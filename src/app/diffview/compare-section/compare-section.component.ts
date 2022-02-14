@@ -6,6 +6,7 @@ import {
   Input,
   OnInit,
   Output,
+  ViewEncapsulation,
 } from '@angular/core';
 import { AnimationService } from '../services/animation.service';
 import * as _ from 'lodash';
@@ -14,6 +15,7 @@ import * as _ from 'lodash';
   selector: 'compare-section',
   templateUrl: './compare-section.component.html',
   styleUrls: ['./compare-section.component.css'],
+  encapsulation: ViewEncapsulation.None,
 })
 export class CompareSectionComponent implements OnInit {
   @Input() side!: string;
@@ -21,13 +23,10 @@ export class CompareSectionComponent implements OnInit {
   @Input() connections!: any;
 
   private startAttr: string;
-  private startPointAttr =
-    this.side === 'left' ? 'leftStartPoint' : 'rightStartPoint';
-  private endPointAttr =
-    this.side === 'left' ? 'leftEndPoint' : 'rightEndPoint';
+  private startPointAttr: string;
+  private endPointAttr: string;
   private countAttr: string;
-  private className =
-    this.side === 'left' ? 'left-difference' : 'right-difference';
+  private className: string;
 
   private divs!: Array<HTMLDivElement>;
   private scroll!: HTMLElement;
@@ -49,11 +48,16 @@ export class CompareSectionComponent implements OnInit {
 
     this.startAttr = this.side === 'left' ? 'leftStart' : 'rightStart';
     this.countAttr = this.side === 'left' ? 'leftCount' : 'rightCount';
+    this.startPointAttr =
+      this.side === 'left' ? 'leftStartPoint' : 'rightStartPoint';
+    this.endPointAttr = this.side === 'left' ? 'leftEndPoint' : 'rightEndPoint';
+    this.className =
+      this.side === 'left' ? 'left-difference' : 'right-difference';
 
     // populate text as HTML divs
     this.printText(this.text);
 
-    this.divs = [...this.element.nativeElement.getElementsByTagName('div')];
+    this.divs = [...this.element.nativeElement.querySelectorAll('div')];
 
     this.onAddSection.emit({
       side: this.side,
@@ -146,5 +150,16 @@ export class CompareSectionComponent implements OnInit {
         }
       }
     });
+  }
+
+  /**
+   * Function execute from the parent controller to scroll by some amount.
+   * Scroll on the center of Compare Documents tells both side delta to scroll
+   * @param {number} delta - scroll on interval
+   */
+  scrollDelta(delta) {
+    this.scroll.firstElementChild.scrollTop += delta;
+    this.manualScroll = true;
+    this.calculateConnectionsPoints();
   }
 }

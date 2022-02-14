@@ -109,8 +109,8 @@ export class DiffViewComponent implements OnInit {
    * This function would redraw links between sections
    * @param {Function} fn - function from Compare Links directive that redraw connection between sections
    */
-  addConnectionCallback({ fn, container }) {
-    this.connectionCallback = fn.bind(container);
+  addConnectionCallback({ fn, scope }) {
+    this.connectionCallback = fn;
   }
 
   /**
@@ -134,8 +134,8 @@ export class DiffViewComponent implements OnInit {
     // deltaY is used in Chrome
     // wheelDelta - IE
     let delta = ev.deltaY || (-1 / 10) * ev.wheelDelta * 10;
-    this.animationService.do(function () {
-      _.forEach(this.sections, function (section) {
+    this.animationService.do(() => {
+      _.forEach(this.sections, (section: any) => {
         section.scrollDelta(delta);
       });
       this.executeConnectionCallback();

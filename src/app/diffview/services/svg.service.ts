@@ -1,5 +1,6 @@
-import { Injectable } from '@angular/core';
 import * as _ from 'lodash';
+
+import { Injectable } from '@angular/core';
 import { CompareLinksComponent } from '../compare-links/compare-links.component';
 
 @Injectable({ providedIn: CompareLinksComponent })
@@ -9,7 +10,6 @@ export class SvgService {
 
   createElement(elementName, attributes) {
     var svgElement = document.createElementNS(this.svgNS, elementName);
-    console.log('here is something: ', attributes);
     _.forEach(attributes || {}, function (value, key) {
       svgElement.setAttribute(key, value);
     });
@@ -21,14 +21,14 @@ export class SvgService {
     return this;
   }
 
-  moveTo(x: number, y: number) {
+  moveTo(x, y) {
     this._buffer.push('M', x, y);
     return this;
   }
 
   curve(x1, y1, x2, y2, endX, endY) {
     this._buffer.push('C', x1, y1, x2, y2, endX, endY);
-    return this._buffer;
+    return this;
   }
 
   lineTo(x, y) {

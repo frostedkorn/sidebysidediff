@@ -1,5 +1,4 @@
 import {
-  AfterViewInit,
   Component,
   ElementRef,
   EventEmitter,
@@ -15,7 +14,7 @@ import { SvgService } from '../services/svg.service';
   styleUrls: ['./compare-links.component.css'],
   providers: [SvgService],
 })
-export class CompareLinksComponent implements OnInit, AfterViewInit {
+export class CompareLinksComponent implements OnInit {
   private containerWidth = 80;
   private endWidth = 10;
   private lineWidth = 3;
@@ -35,13 +34,12 @@ export class CompareLinksComponent implements OnInit, AfterViewInit {
       height: '100%',
     });
     (this.element.nativeElement as HTMLElement).appendChild(this.svgContainer);
+
     this.onAddConnectionCallback.emit({
-      fn: this.drawConnection,
-      container: this,
+      fn: this.drawConnection.bind(this),
+      scope: CompareLinksComponent,
     });
   }
-
-  ngAfterViewInit() {}
 
   /**
    * Draw connections taking receiving array of connections
@@ -50,13 +48,8 @@ export class CompareLinksComponent implements OnInit, AfterViewInit {
   drawConnection(connections) {
     let isConnectionPopulated: any;
 
-    console.log('asdfadsf: ', this.element);
-
-    let height = (this.element.nativeElement.firstElementChild as HTMLElement)
-      .offsetHeight;
+    let height = this.element.nativeElement.offsetHeight;
     let fragment = document.createDocumentFragment();
-
-    console.log('height', height);
 
     this.clearContainer();
     this.createVerticalLine(fragment, height);
@@ -72,7 +65,7 @@ export class CompareLinksComponent implements OnInit, AfterViewInit {
       typeof connections[0].rightStartPoint === 'number';
 
     if (isConnectionPopulated) {
-      _.forEach(connections, function (connection) {
+      _.forEach(connections, (connection) => {
         // If block is visible
         var leftBlockVisible =
           (connection.leftStartPoint >= 0 &&
@@ -190,14 +183,14 @@ export class CompareLinksComponent implements OnInit, AfterViewInit {
    * @param {string} color - color of path
    */
   createEnds(fragment, startY, endY, startX, endX, color) {
-    var path,
-      pathEl,
-      x1 = startX,
-      x2 = (startX + endX) / 2,
-      x3 = endX,
-      y1 = startY + 2,
-      y2 = (startY + endY) / 2,
-      y3 = endY - 2;
+    let path;
+    let pathEl;
+    let x1 = startX;
+    let x2 = (startX + endX) / 2;
+    let x3 = endX;
+    let y1 = startY + 2;
+    let y2 = (startY + endY) / 2;
+    let y3 = endY - 2;
 
     path = this.svgService
       .startPath()

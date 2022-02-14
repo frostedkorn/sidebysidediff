@@ -113,8 +113,6 @@ export class DiffService {
         return this.sortFn(line1, line2, 'left_line');
       });
 
-    console.log('here are the left diffs: ', leftDiffs);
-
     for (var i = 0; i < leftDiffs.length; ++i) {
       if (
         leftDiffs[i].left_line !== null &&

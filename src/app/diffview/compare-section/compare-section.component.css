@@ -1,0 +1,35 @@
+/* Compare documents */
+.start-difference {
+  padding-top: 0;
+  border-top: 3px solid #fff;
+}
+.start-difference.left-difference {
+  border-top-color: #ffb6ba;
+}
+.start-difference.right-difference {
+  border-top-color: #97f295;
+}
+.end-difference {
+  padding-bottom: 0;
+  border-bottom: 3px solid #fff;
+}
+.end-difference.left-difference {
+  border-bottom-color: #ffb6ba;
+}
+.end-difference.right-difference {
+  border-bottom-color: #97f295;
+}
+.left-difference {
+  padding-left: 0;
+  border-left: 3px solid #ffb6ba;
+}
+.right-difference {
+  padding-right: 0;
+  border-right: 3px solid #97f295;
+}
+ins {
+  background: #97f295 !important;
+}
+del {
+  background: #ffb6ba !important;
+}
