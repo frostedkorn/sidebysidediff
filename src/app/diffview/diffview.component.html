@@ -1,28 +1,34 @@
-<div class="diffview-container">
+<div class="diffview-container" #diffContainer>
   <!-- left content section -->
-  <ng-scrollbar>
-    <compare-section
-      side="left"
-      [text]="leftText"
-      [connections]="getConnections()"
-      (onAddSection)="addSection($event)"
-    ></compare-section>
-  </ng-scrollbar>
+  <div class="left-section">
+    <ng-scrollbar>
+      <compare-section
+        side="left"
+        [text]="leftText"
+        [connections]="getConnections()"
+        (onAddSection)="addSection($event)"
+      ></compare-section>
+    </ng-scrollbar>
+  </div>
 
   <!-- connection links -->
-  <compare-links
-    #compareLinks
-    (mousewheel)="scrollSections($event)"
-    (onDrawConnections)="addConnectionCallback($event)"
-  ></compare-links>
+  <div class="connectors">
+    <compare-links
+      #compareLinks
+      (mousewheel)="scrollSections($event)"
+      (onAddConnectionCallback)="addConnectionCallback($event)"
+    ></compare-links>
+  </div>
 
   <!-- right content section -->
-  <!-- <ng-scrollbar>
-    <compare-section
-      side="right"
-      [text]="rightText"
-      [connections]="getConnections()"
-      (onAddSection)="addSection($event)"
-    ></compare-section>
-  </ng-scrollbar> -->
+  <div class="right-section">
+    <ng-scrollbar>
+      <compare-section
+        side="right"
+        [text]="rightText"
+        [connections]="getConnections()"
+        (onAddSection)="addSection($event)"
+      ></compare-section>
+    </ng-scrollbar>
+  </div>
 </div>

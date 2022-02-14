@@ -37,8 +37,8 @@ export class DiffViewComponent implements OnInit {
       this.leftText = this.diffService.prepareTexts(this.diff, 'left');
       this.rightText = this.diffService.prepareTexts(this.diff, 'right');
       this.connections = this.diffService.prepareConnection(this.diff);
-      // Draw initial connections
 
+      // Draw initial connections
       this.sections &&
         this.animationService.do(() => {
           _.forEach(this.sections, function (section: any) {
@@ -55,8 +55,6 @@ export class DiffViewComponent implements OnInit {
    * @param {Directive} section - scope of section directive
    */
   public addSection(event: any) {
-    console.log('adding section: ', event);
-
     const side = event.side;
     const section = event.section;
 
@@ -79,13 +77,13 @@ export class DiffViewComponent implements OnInit {
    */
   clickSection(data) {
     // Take opposite section
-    var section = _.find(this.sections, function (section) {
+    let section = _.find(this.sections, function (section) {
       return section !== this.sections[data.side];
     });
 
     // If connection line was not found init text is fully similar or don't exist in the other section
     if (!data.connection) {
-      var lineAttr = data.side === 'left' ? 'left_line' : 'right_line',
+      let lineAttr = data.side === 'left' ? 'left_line' : 'right_line',
         connection = _.find(this.diff, function (line) {
           return line[lineAttr] === data.elemInd + 1;
         });
@@ -111,9 +109,8 @@ export class DiffViewComponent implements OnInit {
    * This function would redraw links between sections
    * @param {Function} fn - function from Compare Links directive that redraw connection between sections
    */
-  addConnectionCallback(fn) {
-    this.connectionCallback = fn;
-    fn(this.connections);
+  addConnectionCallback({ fn, container }) {
+    this.connectionCallback = fn.bind(container);
   }
 
   /**
@@ -136,7 +133,7 @@ export class DiffViewComponent implements OnInit {
 
     // deltaY is used in Chrome
     // wheelDelta - IE
-    var delta = ev.deltaY || (-1 / 10) * ev.wheelDelta * 10;
+    let delta = ev.deltaY || (-1 / 10) * ev.wheelDelta * 10;
     this.animationService.do(function () {
       _.forEach(this.sections, function (section) {
         section.scrollDelta(delta);

@@ -6,13 +6,14 @@ import {
   OnInit,
   Output,
 } from '@angular/core';
-import { SvgService } from '../../svg.service';
 import * as _ from 'lodash';
+import { SvgService } from '../services/svg.service';
 
 @Component({
   selector: 'compare-links',
   templateUrl: './compare-links.component.html',
   styleUrls: ['./compare-links.component.css'],
+  providers: [SvgService],
 })
 export class CompareLinksComponent implements OnInit, AfterViewInit {
   private containerWidth = 80;
@@ -24,7 +25,7 @@ export class CompareLinksComponent implements OnInit, AfterViewInit {
   private colorRightBlock = '#97f295';
   private svgContainer!: any;
 
-  @Output() onDrawConnections = new EventEmitter<any>();
+  @Output() onAddConnectionCallback = new EventEmitter<any>();
 
   constructor(private svgService: SvgService, private element: ElementRef) {}
 
@@ -34,7 +35,10 @@ export class CompareLinksComponent implements OnInit, AfterViewInit {
       height: '100%',
     });
     (this.element.nativeElement as HTMLElement).appendChild(this.svgContainer);
-    this.onDrawConnections.emit(this.drawConnection);
+    this.onAddConnectionCallback.emit({
+      fn: this.drawConnection,
+      container: this,
+    });
   }
 
   ngAfterViewInit() {}
@@ -45,9 +49,14 @@ export class CompareLinksComponent implements OnInit, AfterViewInit {
    */
   drawConnection(connections) {
     let isConnectionPopulated: any;
-    let height = (this.element.nativeElement.firstChild as HTMLElement)
+
+    console.log('asdfadsf: ', this.element);
+
+    let height = (this.element.nativeElement.firstElementChild as HTMLElement)
       .offsetHeight;
     let fragment = document.createDocumentFragment();
+
+    console.log('height', height);
 
     this.clearContainer();
     this.createVerticalLine(fragment, height);
@@ -120,7 +129,7 @@ export class CompareLinksComponent implements OnInit, AfterViewInit {
    * @param {number} height - height of svg block and right and left blocks
    */
   createVerticalLine(fragment, height) {
-    var line = this.svgService.createElement('path', {
+    let line = this.svgService.createElement('path', {
       d: this.svgService
         .startPath()
         .moveTo(this.containerWidth / 2, 0)
@@ -129,7 +138,6 @@ export class CompareLinksComponent implements OnInit, AfterViewInit {
       stroke: this.colorSeparationLine,
       'stroke-width': 1,
     });
-    console.log('here is the line: ', line);
     fragment.appendChild(line);
   }
 
@@ -164,7 +172,7 @@ export class CompareLinksComponent implements OnInit, AfterViewInit {
       id: 'linearGradient',
     });
 
-    _.map(stops, function (stopAttr) {
+    _.map(stops, (stopAttr) => {
       var stopEl = this.svgService.createElement('stop', stopAttr);
       gradient.appendChild(stopEl);
     });

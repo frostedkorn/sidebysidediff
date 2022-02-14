@@ -20,12 +20,12 @@ export class CompareSectionComponent implements OnInit {
   @Input() text!: any;
   @Input() connections!: any;
 
-  private startAttr = this.side === 'left' ? 'leftStart' : 'rightStart';
+  private startAttr: string;
   private startPointAttr =
     this.side === 'left' ? 'leftStartPoint' : 'rightStartPoint';
   private endPointAttr =
     this.side === 'left' ? 'leftEndPoint' : 'rightEndPoint';
-  private countAttr = this.side === 'left' ? 'leftCount' : 'rightCount';
+  private countAttr: string;
   private className =
     this.side === 'left' ? 'left-difference' : 'right-difference';
 
@@ -47,8 +47,12 @@ export class CompareSectionComponent implements OnInit {
   ngOnInit() {
     this.scroll = (this.element.nativeElement as HTMLElement).parentElement;
 
+    this.startAttr = this.side === 'left' ? 'leftStart' : 'rightStart';
+    this.countAttr = this.side === 'left' ? 'leftCount' : 'rightCount';
+
     // populate text as HTML divs
     this.printText(this.text);
+
     this.divs = [...this.element.nativeElement.getElementsByTagName('div')];
 
     this.onAddSection.emit({
@@ -89,8 +93,8 @@ export class CompareSectionComponent implements OnInit {
     let spanEl;
 
     // Prepare structure '<div><span class="line-number">' + line.ind + '</span><span class="line-text">' + line.text + '</span></div>'
-    (divEl = document.createElement('div')),
-      (spanEl = document.createElement('span'));
+    divEl = document.createElement('div');
+    spanEl = document.createElement('span');
     spanEl.classList.add('line-number');
     divEl.appendChild(spanEl);
 
@@ -107,9 +111,7 @@ export class CompareSectionComponent implements OnInit {
     });
 
     this.addClasses(fragment.childNodes);
-    (this.element.nativeElement as HTMLElement).firstChild.appendChild(
-      fragment
-    );
+    this.element.nativeElement.appendChild(fragment);
   }
 
   /**
@@ -118,14 +120,12 @@ export class CompareSectionComponent implements OnInit {
    * @param {HTMLElements} htmlLines - divs with html string for every line of text
    */
   addClasses(htmlLines) {
-    console.log('here are the connections: ', this.connections);
     _.forEach(this.connections, (connection) => {
       const startInd = connection[this.startAttr];
       const endInd = startInd + connection[this.countAttr] - 1;
       let classList: any;
 
       if (connection[this.countAttr] === 1) {
-        htmlLines[startInd] === undefined && console.log('startInd', startInd);
         classList = (htmlLines[startInd] as HTMLElement).classList;
         classList.add('start-difference');
         classList.add('end-difference');
