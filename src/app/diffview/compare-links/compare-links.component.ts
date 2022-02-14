@@ -1,3 +1,5 @@
+import * as _ from 'lodash';
+
 import {
   Component,
   ElementRef,
@@ -5,8 +7,9 @@ import {
   OnInit,
   Output,
 } from '@angular/core';
-import * as _ from 'lodash';
+
 import { SvgService } from '../services/svg.service';
+import { LEFT_ARROW } from '@angular/cdk/keycodes/public-api';
 
 @Component({
   selector: 'compare-links',
@@ -22,34 +25,33 @@ export class CompareLinksComponent implements OnInit {
   private colorSeparationLine = '#333333';
   private colorLeftBlock = '#ffb6ba';
   private colorRightBlock = '#97f295';
-  private svgContainer!: any;
+  private svgContainer!: SVGElement;
 
   @Output() onAddConnectionCallback = new EventEmitter<any>();
 
   constructor(private svgService: SvgService, private element: ElementRef) {}
 
   ngOnInit() {
+    // initialize the svg container for the connections
     this.svgContainer = this.svgService.createElement('svg', {
       width: this.containerWidth,
       height: '100%',
     });
+
     (this.element.nativeElement as HTMLElement).appendChild(this.svgContainer);
 
-    this.onAddConnectionCallback.emit({
-      fn: this.drawConnection.bind(this),
-      scope: CompareLinksComponent,
-    });
+    this.onAddConnectionCallback.emit(this.drawConnection.bind(this));
   }
 
   /**
    * Draw connections taking receiving array of connections
    * @param {array} connections - array of connections with start and end points
    */
-  drawConnection(connections) {
+  drawConnection(connections: Array<any>): void {
     let isConnectionPopulated: any;
 
     let height = this.element.nativeElement.offsetHeight;
-    let fragment = document.createDocumentFragment();
+    const fragment = document.createDocumentFragment();
 
     this.clearContainer();
     this.createVerticalLine(fragment, height);
@@ -102,6 +104,8 @@ export class CompareLinksComponent implements OnInit {
             connection.rightEndPoint,
             this.containerWidth - this.endWidth
           );
+          console.log(fragment.childNodes);
+          this.svgContainer.appendChild(fragment);
         }
       });
     }
@@ -220,7 +224,7 @@ export class CompareLinksComponent implements OnInit {
    * @param {number} xEnd - X ending point on the right side
    */
   createConnection(fragment, start1, end1, xStart, start2, end2, xEnd) {
-    var pathEl;
+    let pathEl: SVGElement;
 
     if (start1 + end1 !== start2 + end2) {
       // 2 curve lines if it is not straight horizontal line
@@ -241,7 +245,7 @@ export class CompareLinksComponent implements OnInit {
    * @param {number} xEnd - X ending point on the right side
    * @return {SvgElement} rectangle element to present straight line
    */
-  createStraightLine(start, end, xStart, xEnd) {
+  createStraightLine(start, end, xStart: number, xEnd: number) {
     return this.svgService.createElement('rect', {
       width: xEnd - xStart,
       height: this.lineWidth,
@@ -262,16 +266,16 @@ export class CompareLinksComponent implements OnInit {
    * @return {SvgElement} path element to present curly line
    */
   createCurvyLine(start1, end1, xStart, start2, end2, xEnd) {
-    var path,
-      pathEl,
-      x1 = xStart,
-      x2 = (xStart + xEnd) / 4,
-      x3 = (xStart + xEnd) / 2,
-      x4 = (3 * (xStart + xEnd)) / 4,
-      x5 = xEnd,
-      y1 = (start1 + end1) / 2,
-      y2 = (start1 + end1 + start2 + end2) / 4,
-      y3 = (start2 + end2) / 2;
+    let path;
+    let pathEl;
+    let x1 = xStart;
+    let x2 = (xStart + xEnd) / 4;
+    let x3 = (xStart + xEnd) / 2;
+    let x4 = (3 * (xStart + xEnd)) / 4;
+    let x5 = xEnd;
+    let y1 = (start1 + end1) / 2;
+    let y2 = (start1 + end1 + start2 + end2) / 4;
+    let y3 = (start2 + end2) / 2;
 
     path = this.svgService
       .startPath()

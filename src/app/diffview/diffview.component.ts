@@ -109,7 +109,7 @@ export class DiffViewComponent implements OnInit {
    * This function would redraw links between sections
    * @param {Function} fn - function from Compare Links directive that redraw connection between sections
    */
-  addConnectionCallback({ fn, scope }) {
+  addConnectionCallback(fn) {
     this.connectionCallback = fn;
   }
 
