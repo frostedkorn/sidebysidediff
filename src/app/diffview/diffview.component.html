@@ -1,13 +1,16 @@
 <div class="diffview-container" #diffContainer>
   <!-- left content section -->
   <div class="left-section">
-    <ng-scrollbar>
+    <ng-scrollbar position="invertY">
       <compare-section
         side="left"
         [text]="leftText"
         [connections]="getConnections()"
         (onAddSection)="addSection($event)"
-      ></compare-section>
+        (onExecuteConnectionCallback)="executeConnectionCallback()"
+        (onClickSection)="clickSection($event)"
+      >
+      </compare-section>
     </ng-scrollbar>
   </div>
 
@@ -15,8 +18,12 @@
   <div class="connectors">
     <compare-links
       #compareLinks
+      [connections]="getConnections()"
       (mousewheel)="scrollSections($event)"
       (onAddConnectionCallback)="addConnectionCallback($event)"
+      [colorSeparationLine]="colorSeparationLine"
+      [colorLeftBlock]="colorLeftBlock"
+      [colorRightBlock]="colorRightBlock"
     ></compare-links>
   </div>
 
@@ -28,7 +35,10 @@
         [text]="rightText"
         [connections]="getConnections()"
         (onAddSection)="addSection($event)"
-      ></compare-section>
+        (onExecuteConnectionCallback)="executeConnectionCallback()"
+        (onClickSection)="clickSection($event)"
+      >
+      </compare-section>
     </ng-scrollbar>
   </div>
 </div>

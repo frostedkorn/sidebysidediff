@@ -1,7 +1,7 @@
-import * as _ from 'lodash';
-import { Component, OnInit } from '@angular/core';
-import { AnimationService } from './services/animation.service';
+import { Component, Input, OnInit } from '@angular/core';
 import { DiffService } from './diff.service';
+import { AddSectionInput } from './models/diff.model';
+import { AnimationService } from './services/animation.service';
 
 @Component({
   selector: 'diff-view',
@@ -9,14 +9,18 @@ import { DiffService } from './diff.service';
   styleUrls: ['./diffview.component.css'],
 })
 export class DiffViewComponent implements OnInit {
-  private sections = {};
+  private sections: any = {};
   private connections!: any;
-  private connectionCallback = _.noop;
+  private connectionCallback = (args: any) => {};
   private loader = true;
   public diff: any;
   public score: any;
   public leftText: any;
   public rightText: any;
+
+  @Input() colorSeparationLine: string = '#333333';
+  @Input() colorLeftBlock: string = '#ffb6ba';
+  @Input() colorRightBlock: string = '#97f295';
 
   constructor(
     private animationService: AnimationService,
@@ -25,13 +29,12 @@ export class DiffViewComponent implements OnInit {
 
   ngOnInit() {
     const data = this.diffService.getFormComparison(
-      { FormNumber: 'test', IsIsoForm: false },
-      { FormNumber: 'test1', IsIsoForm: false }
+      { FormNumber: 'test', IsISOForm: false },
+      { FormNumber: 'test1', IsISOForm: false }
     );
 
     this.diff = data.diff;
     if (!this.diff) {
-      console.log('no any comparison results found');
     } else {
       this.score = Math.floor(data.score * 100);
       this.leftText = this.diffService.prepareTexts(this.diff, 'left');
@@ -41,7 +44,10 @@ export class DiffViewComponent implements OnInit {
       // Draw initial connections
       this.sections &&
         this.animationService.do(() => {
-          _.forEach(this.sections, function (section: any) {
+          Object.entries(this.sections).forEach(function ([
+            sectionKey,
+            section,
+          ]: [string, any]) {
             section.calculateConnectionsPoints();
           });
           this.executeConnectionCallback();
@@ -52,9 +58,9 @@ export class DiffViewComponent implements OnInit {
   /**
    * Add left or right sections
    * @param {string} side - left or right
-   * @param {Directive} section - scope of section directive
+   * @param {Component} section - scope of the section component
    */
-  public addSection(event: any) {
+  public addSection(event: AddSectionInput) {
     const side = event.side;
     const section = event.section;
 
@@ -75,18 +81,20 @@ export class DiffViewComponent implements OnInit {
    *     scrollTo - calculated
    *     conection - connection for clicked line, block
    */
-  clickSection(data) {
+  clickSection(data: any) {
     // Take opposite section
-    let section = _.find(this.sections, function (section) {
-      return section !== this.sections[data.side];
-    });
+    let section = (
+      Object.entries(this.sections).find(([side, section]: [string, any]) => {
+        return section !== this.sections[data.side];
+      }) as Array<any>
+    )[1];
 
     // If connection line was not found init text is fully similar or don't exist in the other section
     if (!data.connection) {
-      let lineAttr = data.side === 'left' ? 'left_line' : 'right_line',
-        connection = _.find(this.diff, function (line) {
-          return line[lineAttr] === data.elemInd + 1;
-        });
+      let lineAttr = data.side === 'left' ? 'left_line' : 'right_line';
+      let connection = this.diff.find((line: any) => {
+        return line[lineAttr] === data.elemInd + 1;
+      });
 
       data.connection = {
         leftStart: connection.left_line && connection.left_line - 1,
@@ -109,7 +117,7 @@ export class DiffViewComponent implements OnInit {
    * This function would redraw links between sections
    * @param {Function} fn - function from Compare Links directive that redraw connection between sections
    */
-  addConnectionCallback(fn) {
+  addConnectionCallback(fn: any) {
     this.connectionCallback = fn;
   }
 
@@ -128,14 +136,12 @@ export class DiffViewComponent implements OnInit {
    * Execute on mousewheel event in the link area
    * @param {Event} ev - mousewheel event
    */
-  scrollSections(ev) {
+  scrollSections(ev: any) {
     if (Object.keys(this.sections).length === 0) return;
 
-    // deltaY is used in Chrome
-    // wheelDelta - IE
-    let delta = ev.deltaY || (-1 / 10) * ev.wheelDelta * 10;
+    let delta = ev.deltaY;
     this.animationService.do(() => {
-      _.forEach(this.sections, (section: any) => {
+      this.sections.forEach((section: any) => {
         section.scrollDelta(delta);
       });
       this.executeConnectionCallback();

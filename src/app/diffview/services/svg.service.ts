@@ -1,23 +1,26 @@
-import * as _ from 'lodash';
-
 import { Injectable } from '@angular/core';
-import { CompareLinksComponent } from '../compare-links/compare-links.component';
 
-@Injectable({ providedIn: CompareLinksComponent })
+@Injectable()
 export class SvgService {
   private svgNS = 'http://www.w3.org/2000/svg';
-  private _buffer: Array<any>;
+  private _buffer!: Array<any>;
 
-  // create svg container element
+  /**
+   * Creates a svg element with the namespace
+   * @constructor
+   * @param  {string} elementName - the name of the element to be created
+   * @param  {any} attributes - attributes list for the element
+   */
   createElement(elementName: string, attributes: any) {
     var svgElement = document.createElementNS(
       this.svgNS,
       elementName
     ) as SVGElement;
 
-    _.forEach(attributes || {}, function (value, key) {
+    Object.entries(attributes).forEach(([key, value]: [string, any]) => {
       svgElement.setAttribute(key, value);
     });
+
     return svgElement;
   }
 

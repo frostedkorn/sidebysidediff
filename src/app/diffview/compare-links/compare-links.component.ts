@@ -1,15 +1,13 @@
-import * as _ from 'lodash';
-
 import {
   Component,
   ElementRef,
   EventEmitter,
+  Input,
   OnInit,
   Output,
 } from '@angular/core';
-
 import { SvgService } from '../services/svg.service';
-import { LEFT_ARROW } from '@angular/cdk/keycodes/public-api';
+import { Connection } from './../models/diff.model';
 
 @Component({
   selector: 'compare-links',
@@ -18,21 +16,27 @@ import { LEFT_ARROW } from '@angular/cdk/keycodes/public-api';
   providers: [SvgService],
 })
 export class CompareLinksComponent implements OnInit {
-  private containerWidth = 80;
-  private endWidth = 10;
-  private lineWidth = 3;
-  private gradientName = 'linearGradient';
-  private colorSeparationLine = '#333333';
-  private colorLeftBlock = '#ffb6ba';
-  private colorRightBlock = '#97f295';
+  private containerWidth: number = 80;
+  private endWidth: number = 10;
+  private lineWidth: number = 3;
   private svgContainer!: SVGElement;
+  private gradientName: string = 'linearGradient';
+
+  @Input() colorSeparationLine: string = '#333333';
+  @Input() colorLeftBlock: string = '#ffb6ba';
+  @Input() colorRightBlock: string = '#97f295';
+  @Input() connections!: any;
 
   @Output() onAddConnectionCallback = new EventEmitter<any>();
 
+  /**
+   * @constructor
+   * @param  {SvgService} svgService - Service to generate svg elements
+   * @param  {ElementRef} element - Reference to the current element
+   */
   constructor(private svgService: SvgService, private element: ElementRef) {}
 
   ngOnInit() {
-    // initialize the svg container for the connections
     this.svgContainer = this.svgService.createElement('svg', {
       width: this.containerWidth,
       height: '100%',
@@ -45,19 +49,17 @@ export class CompareLinksComponent implements OnInit {
 
   /**
    * Draw connections taking receiving array of connections
-   * @param {array} connections - array of connections with start and end points
+   * @param {Arary<any>} connections - array of connections with start and end points
    */
   drawConnection(connections: Array<any>): void {
     let isConnectionPopulated: any;
-
-    let height = this.element.nativeElement.offsetHeight;
     const fragment = document.createDocumentFragment();
+    let height = this.element.nativeElement.firstChild.clientHeight;
 
     this.clearContainer();
     this.createVerticalLine(fragment, height);
     this.createGradient(fragment, this.colorLeftBlock, this.colorRightBlock);
 
-    // Connect differences between left and right sides
     isConnectionPopulated = connections && connections[0];
     isConnectionPopulated =
       isConnectionPopulated &&
@@ -67,8 +69,7 @@ export class CompareLinksComponent implements OnInit {
       typeof connections[0].rightStartPoint === 'number';
 
     if (isConnectionPopulated) {
-      _.forEach(connections, (connection) => {
-        // If block is visible
+      connections.forEach((connection: Connection) => {
         var leftBlockVisible =
           (connection.leftStartPoint >= 0 &&
             connection.leftStartPoint <= height) ||
@@ -104,7 +105,6 @@ export class CompareLinksComponent implements OnInit {
             connection.rightEndPoint,
             this.containerWidth - this.endWidth
           );
-          console.log(fragment.childNodes);
           this.svgContainer.appendChild(fragment);
         }
       });
@@ -114,7 +114,7 @@ export class CompareLinksComponent implements OnInit {
   /**
    * Clear container before drawing anything else
    */
-  clearContainer() {
+  clearContainer(): void {
     while (this.svgContainer.firstChild) {
       this.svgContainer.removeChild(this.svgContainer.firstChild);
     }
@@ -122,10 +122,10 @@ export class CompareLinksComponent implements OnInit {
 
   /**
    * Create vertical line between left and right blocks
-   * @param {HTMLElement} fragment - element that combine all drawing elements
+   * @param {DocumentFragment} fragment - element that combine all drawing elements
    * @param {number} height - height of svg block and right and left blocks
    */
-  createVerticalLine(fragment, height) {
+  createVerticalLine(fragment: DocumentFragment, height: number): void {
     let line = this.svgService.createElement('path', {
       d: this.svgService
         .startPath()
@@ -140,36 +140,40 @@ export class CompareLinksComponent implements OnInit {
 
   /**
    * Create linear gradient of different colors on left and right side combining by gradient
-   * @param {HTMLElement} fragment - element that combine all drawing elements
+   * @param {DocumentFragment} fragment - element that combine all drawing elements
    * @param {string} color1 - color on the left side
    * @param {string} color2 - color on the right side
    */
-  createGradient(fragment, color1, color2) {
-    var stops = [
-        {
-          offset: 0,
-          'stop-color': color1,
-        },
-        {
-          offset: 0.3,
-          'stop-color': color1,
-        },
-        {
-          offset: 0.7,
-          'stop-color': color2,
-        },
-        {
-          offset: 1,
-          'stop-color': color2,
-        },
-      ],
-      gradient;
+  createGradient(
+    fragment: DocumentFragment,
+    color1: string,
+    color2: string
+  ): void {
+    let stops = [
+      {
+        offset: 0,
+        'stop-color': color1,
+      },
+      {
+        offset: 0.3,
+        'stop-color': color1,
+      },
+      {
+        offset: 0.7,
+        'stop-color': color2,
+      },
+      {
+        offset: 1,
+        'stop-color': color2,
+      },
+    ];
+    let gradient: SVGElement;
 
     gradient = this.svgService.createElement('linearGradient', {
       id: 'linearGradient',
     });
 
-    _.map(stops, (stopAttr) => {
+    stops.map((stopAttr: any) => {
       var stopEl = this.svgService.createElement('stop', stopAttr);
       gradient.appendChild(stopEl);
     });
@@ -186,7 +190,14 @@ export class CompareLinksComponent implements OnInit {
    * @param {number} endX - X end point of path
    * @param {string} color - color of path
    */
-  createEnds(fragment, startY, endY, startX, endX, color) {
+  createEnds(
+    fragment: DocumentFragment,
+    startY: number,
+    endY: number,
+    startX: number,
+    endX: number,
+    color: string
+  ) {
     let path;
     let pathEl;
     let x1 = startX;
@@ -223,7 +234,15 @@ export class CompareLinksComponent implements OnInit {
    * @param {number} end2 - Y of block end on the right side
    * @param {number} xEnd - X ending point on the right side
    */
-  createConnection(fragment, start1, end1, xStart, start2, end2, xEnd) {
+  createConnection(
+    fragment: any,
+    start1: number,
+    end1: number,
+    xStart: number,
+    start2: number,
+    end2: number,
+    xEnd: number
+  ): void {
     let pathEl: SVGElement;
 
     if (start1 + end1 !== start2 + end2) {
@@ -243,9 +262,14 @@ export class CompareLinksComponent implements OnInit {
    * @param {number} end - Y of block end on the left side
    * @param {number} xStart - X starting point on the left side
    * @param {number} xEnd - X ending point on the right side
-   * @return {SvgElement} rectangle element to present straight line
+   * @return {SVGElement} rectangle element to present straight line
    */
-  createStraightLine(start, end, xStart: number, xEnd: number) {
+  createStraightLine(
+    start: number,
+    end: number,
+    xStart: number,
+    xEnd: number
+  ): SVGElement {
     return this.svgService.createElement('rect', {
       width: xEnd - xStart,
       height: this.lineWidth,
@@ -263,11 +287,17 @@ export class CompareLinksComponent implements OnInit {
    * @param {number} start2 - Y of block start on the right side
    * @param {number} end2 - Y of block end on the right side
    * @param {number} xEnd - X ending point on the right side
-   * @return {SvgElement} path element to present curly line
+   * @return {SVGElement} path element to present curly line
    */
-  createCurvyLine(start1, end1, xStart, start2, end2, xEnd) {
-    let path;
-    let pathEl;
+  createCurvyLine(
+    start1: number,
+    end1: number,
+    xStart: number,
+    start2: number,
+    end2: number,
+    xEnd: number
+  ): SVGElement {
+    let path: string;
     let x1 = xStart;
     let x2 = (xStart + xEnd) / 4;
     let x3 = (xStart + xEnd) / 2;
